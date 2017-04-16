@@ -1,2 +1,2 @@
 all:	
-	@echo "making test...";$(MAKE) -C test all
+	@echo "making tests...";make -C tests all

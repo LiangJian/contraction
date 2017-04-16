@@ -1,5 +1,7 @@
-all:	test1
-test1: 	test1.cpp
+all:	contraction.a
+
+contraction.a:	type.o
+	ar -rc libcontraction.a  *.o
 
 include ../make.inc
 
