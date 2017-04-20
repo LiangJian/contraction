@@ -13,23 +13,23 @@ int main()
   vector.add("is",3);
   vector.add("ic",2);
   vector.ini();
-  data.resize(vector.get_size());
+  data.resize(vector.size);
   for(int i=0;i<data.size();++i)data.at(i) = i;
   vector.assign(data);
 
   for(int i=0;i<6;i++){
     std::cout<<i<<std::endl;
-    std::cout<<vector.get_vector(0,i)<<std::endl;
+    std::cout<<vector.get_sub_vector(0,i).vector<<std::endl;
   }
   std::cout<<"===="<<std::endl;
   for(int i=0;i<8;i++){
     std::cout<<i<<std::endl;
-    std::cout<<vector.get_vector(1,i)<<std::endl;
+    std::cout<<vector.get_sub_vector(1,i).vector<<std::endl;
   }
   std::cout<<"===="<<std::endl;
   for(int i=0;i<12;i++){
     std::cout<<i<<std::endl;
-    std::cout<<vector.get_vector(2,i)<<std::endl;
+    std::cout<<vector.get_sub_vector(2,i).vector<<std::endl;
   }
  
   std::cout<<"===="<<std::endl;
@@ -39,25 +39,25 @@ int main()
   matrix.add("is",2);
   matrix.add("ix",1);
   matrix.ini();
-  data.resize(matrix.get_size()*matrix.get_size());
+  data.resize(matrix.size*matrix.size);
   for(int i=0;i<data.size();++i)data.at(i) = i;
   matrix.assign(data);
   for(int i=0;i<2;i++)
   for(int j=0;j<2;j++){
     std::cout<<i<<'\t'<<j<<std::endl;
-    std::cout<<matrix.get_matrix(0,i,j)<<std::endl;
+    std::cout<<matrix.get_sub_matrix(0,i,j).matrix<<std::endl;
   }
   std::cout<<"===="<<std::endl;
   for(int i=0;i<3;i++)
   for(int j=0;j<3;j++){
     std::cout<<i<<'\t'<<j<<std::endl;
-    std::cout<<matrix.get_matrix(1,i,j)<<std::endl;
+    std::cout<<matrix.get_sub_matrix(1,i,j).matrix<<std::endl;
   }
   std::cout<<"===="<<std::endl;
   for(int i=0;i<6;i++)
   for(int j=0;j<6;j++){
     std::cout<<i<<'\t'<<j<<std::endl;
-    std::cout<<matrix.get_matrix(2,i,j)<<std::endl;
+    std::cout<<matrix.get_sub_matrix(2,i,j).matrix<<std::endl;
   }
 
   std::cout<<"===="<<std::endl;

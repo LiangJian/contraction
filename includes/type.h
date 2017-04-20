@@ -20,6 +20,9 @@ namespace contraction{
   }; 
 
   template<typename T>
+  class Vectors;
+
+  template<typename T>
   class Matrices{
   public:
     unsigned int size;
@@ -38,35 +41,55 @@ namespace contraction{
       else
 	std::cout<<"nothing in the matrix"<<std::endl;
     }
-    void test(){};
-    unsigned int get_size(){return size;}
-    void load(std::string filename){};
+
+    void load(std::string filename){}
+
     void assign(std::vector<std::complex<T> >&data){
-      if(data.size() != size*size) {std::cout<<"size mismatch"<<std::endl;exit(-1);}
+      if(data.size() != size*size) {throw("size mismatch");}
       for(int i=0;i<size;i++)
       for(int j=0;j<size;j++)
 	matrix(i,j) = data.at(i*size+j);
-    };
+    }
+    void copy_meta(Matrices<T>const& src){
+      meta=src.meta;
+      size=src.size;
+    }
 
-    Eigen::Matrix< std::complex<T> , Eigen::Dynamic , Eigen::Dynamic>get_matrix(int order, int count1=0,int count2=0){
-	//std::cout<<matrix<<std::endl;
-      Eigen::Matrix< std::complex<T> , Eigen::Dynamic , Eigen::Dynamic>val;
+    Matrices<T>get_sub_matrix(int order, int count1=0,int count2=0){
+      Eigen::Matrix< std::complex<T> , Eigen::Dynamic , Eigen::Dynamic>tmp;
       int outersize = 1;
       for(int i=order+1;i<meta.size();i++)outersize*=meta[i].length;
       int innersize = 1;
       for(int i=order-1;i>=0;i--)innersize*=meta[i].length;
-      if(count1 > outersize*innersize) std::cerr<<"size mismatch"<<std::endl;
-      if(count2 > outersize*innersize) std::cerr<<"size mismatch"<<std::endl;
+      if(count1 > outersize*innersize) throw("size mismatch");
+      if(count2 > outersize*innersize) throw("size mismatch");
       int i_outer1 = count1/innersize;
       int i_inner1 = count1%innersize;
       int i_outer2 = count2/innersize;
       int i_inner2 = count2%innersize;
-      val = Eigen::Map<Eigen::Matrix< std::complex<T> , Eigen::Dynamic , Eigen::Dynamic>, 0, Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic> >
+      tmp = Eigen::Map<Eigen::Matrix< std::complex<T> , Eigen::Dynamic , Eigen::Dynamic>, 0, Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic> >
 	(matrix.data()+(i_outer2*innersize*meta[order].length+i_inner2)*size+i_outer1*innersize*meta[order].length+i_inner1, 
 	 meta[order].length,meta[order].length, Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>(matrix.outerStride()*innersize,matrix.innerStride()*innersize));
+      Matrices<T>val;
+      val.add(meta[order].name,meta[order].length);
+      val.ini();
+      val.matrix = tmp;
       return val;
     }
-    
+    Vectors<T> operator *(Vectors<T>const& V){
+      Vectors<T>val;
+      val.copy_meta(V);
+      val.ini();
+      if(size != V.size ){
+	  throw("size mismatch");
+      }else if(meta[0].name != V.meta[0].name){
+	  throw("dimension name mismatch");
+      }else{
+	  val.vector=matrix*V.vector;
+      }
+      return val;
+    }
+
   };
 
   template<typename T>
@@ -88,32 +111,17 @@ namespace contraction{
       else
 	std::cout<<"nothing in the vector"<<std::endl;
     }
-    void test(){};
-    unsigned int get_size(){return size;}
     void load(std::string filename){};
+
     void assign(std::vector<std::complex<T> >&data){
-      if(data.size() != size) {std::cout<<"size mismatch"<<std::endl;exit(-1);}
+      if(data.size() != size) {throw("size mismatch");}
       for(int i=0;i<size;i++) vector[i]=data.at(i);
     };
-    void copy_meta(Vectors<T>& src){
+    void copy_meta(Vectors<T>const& src){
       meta=src.meta;
       size=src.size;
     }
-    Eigen::Matrix< std::complex<T> , Eigen::Dynamic , 1> get_vector(int order, int count=0){
-      Eigen::Matrix< std::complex<T> , Eigen::Dynamic , 1>val;
-      int outersize = 1;
-      for(int i=order+1;i<meta.size();i++)outersize*=meta[i].length;
-      int innersize = 1;
-      for(int i=order-1;i>=0;i--)innersize*=meta[i].length;
-      //std::cout<<outersize<<'\t'<<innersize<<std::endl;
-      if(count > outersize*innersize) std::cerr<<"size mismatch"<<std::endl;
-      int i_outer = count/innersize;
-      int i_inner = count%innersize;
-      val = Eigen::Map<Eigen::Matrix< std::complex<T> , Eigen::Dynamic , 1>, 0, Eigen::InnerStride<Eigen::Dynamic> >
-	(vector.data()+i_outer*innersize*meta[order].length+i_inner, meta[order].length, 1, Eigen::InnerStride<>(innersize));
-	//.block(0,0,2,1);//pos pos size size
-      return val;
-    }
+
     Vectors<T> get_sub_vector(int order, int count=0){
       Eigen::Matrix< std::complex<T> , Eigen::Dynamic , 1>tmp;
       int outersize = 1;
@@ -121,30 +129,18 @@ namespace contraction{
       int innersize = 1;
       for(int i=order-1;i>=0;i--)innersize*=meta[i].length;
       //std::cout<<outersize<<'\t'<<innersize<<std::endl;
-      if(count > outersize*innersize) std::cerr<<"size mismatch"<<std::endl;
+      if(count > outersize*innersize) throw("size mismatch");
       int i_outer = count/innersize;
       int i_inner = count%innersize;
       tmp = Eigen::Map<Eigen::Matrix< std::complex<T> , Eigen::Dynamic , 1>, 0, Eigen::InnerStride<Eigen::Dynamic> >
 	(vector.data()+i_outer*innersize*meta[order].length+i_inner, meta[order].length, 1, Eigen::InnerStride<>(innersize));
 	//.block(0,0,2,1);//pos pos size size
       Vectors<T>val;
-      val.add(meta[order].name,meta[order].size);
+      val.add(meta[order].name,meta[order].length);
       val.ini();
       val.vector = tmp;
       return val;
     }
-    Vectors<T> friend operator *(Matrices<T>& M,Vectors<T>& src){
-      Vectors<T>val;
-      val.copy_meta(src);
-      val.ini();
-      if(M.size == src.size ){
-	  val.vector=M.matrix*src.vector;
-      }else{
-	  std::cerr<<"size mismatch"<<std::endl;
-	  exit(-1);
-      }
-      return val;
-    };
   };
 
   template<typename T>
