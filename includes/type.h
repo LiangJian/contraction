@@ -2,6 +2,8 @@
    type.h
    April 2017
 */
+#ifndef __TYPE__
+#define __TYPE__
 #include <Eigen/Dense>
 #include <vector>
 #include <iostream>
@@ -179,3 +181,4 @@ namespace contraction{
     //void test(void);
   };
 }
+#endif
